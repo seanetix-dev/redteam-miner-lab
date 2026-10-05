@@ -20,6 +20,8 @@ function analyzeSignals(signals) {
 }
 
 async function detectBrowser(page) {
+    const start = performance.now();
+
     const signals = await page.evaluate(() => ({
         webdriver: navigator.webdriver,
         userAgent: navigator.userAgent,
@@ -31,9 +33,14 @@ async function detectBrowser(page) {
         chromeObject: typeof window.chrome !== "undefined"
     }));
 
+    const result = analyzeSignals(signals);
+
+    const elapsedMs = performance.now() - start;
+
     return {
-        ...analyzeSignals(signals),
-        signals
+        ...result,
+        signals,
+        elapsedMs
     };
 }
 

@@ -1,0 +1,55 @@
+[
+  {
+    "experiment": "chromium-headful",
+    "timestamp": "2026-10-05T22:59:10.982Z",
+    "detection": {
+      "automated": true,
+      "indicators": [
+        "navigator.webdriver"
+      ],
+      "signals": {
+        "webdriver": true,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "languages": [
+          "en-US",
+          "en"
+        ],
+        "plugins": 5,
+        "platform": "Linux x86_64",
+        "hardwareConcurrency": 2,
+        "deviceMemory": 16,
+        "chromeObject": true
+      },
+      "elapsedMs": 24.90625399999999
+    },
+    "score": 50,
+    "classification": "suspicious"
+  },
+  {
+    "experiment": "chromium-headless",
+    "timestamp": "2026-10-05T22:59:13.187Z",
+    "detection": {
+      "automated": true,
+      "indicators": [
+        "navigator.webdriver",
+        "HeadlessChrome user agent",
+        "no browser plugins"
+      ],
+      "signals": {
+        "webdriver": true,
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36",
+        "languages": [
+          "en-US"
+        ],
+        "plugins": 0,
+        "platform": "Linux x86_64",
+        "hardwareConcurrency": 2,
+        "deviceMemory": 16,
+        "chromeObject": false
+      },
+      "elapsedMs": 40.53370300000006
+    },
+    "score": 90,
+    "classification": "high-risk"
+  }
+]
