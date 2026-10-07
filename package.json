@@ -10,12 +10,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@seanetix.com:seanetix-dev/redteam-miner-lab.git"
+    "url": "git@github.com:seanetix-dev/redteam-miner-lab.git"
   },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
-    "playwright": "^1.63.0"
+    "playwright": "^1.63.0",
+    "puppeteer": "^25.12.0"
   },
   "devDependencies": {
     "jest": "^30.5.2"

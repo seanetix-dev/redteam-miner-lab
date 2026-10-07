@@ -1,15 +1,36 @@
-const { chromium } = require("playwright");
-const { detectBrowser } = require("../src/detector");
+const { collectSignals } = require("./collect-signals");
+const { launchChromium, launchFirefox } = require("../src/browsers/playwright");
+const { launchPuppeteer } = require("../src/browsers/puppeteer");
+const { analyzeSignals } = require("../src/detector");
 const { calculateMetrics } = require("../src/evaluation");
 
-async function runCase(name, actualAutomated, launchOptions) {
-    const browser = await chromium.launch(launchOptions);
+async function launchChromiumWithSize(headless, width, height) {
+    const { chromium } = require("playwright");
 
+    return chromium.launch({
+        headless,
+        args: [
+            `--window-size=${width},${height}`
+        ]
+    });
+}
+
+async function launchFirefoxWithSize(headless, width, height) {
+    const { firefox } = require("playwright");
+
+    return firefox.launch({
+        headless
+    });
+}
+
+async function runBrowserTest(name, actualAutomated, browserFactory) {
+    const browser = await browserFactory(false);
     const page = await browser.newPage();
 
     await page.goto("https://example.com");
 
-    const detection = await detectBrowser(page);
+    const signals = await collectSignals(page);
+    const detection = analyzeSignals(signals);
 
     await browser.close();
 
@@ -17,42 +38,87 @@ async function runCase(name, actualAutomated, launchOptions) {
         name,
         actualAutomated,
         predictedAutomated: detection.automated,
-        score: detection.indicators
+        indicators: detection.indicators,
+        signals
+    };
+}
+
+async function runPuppeteerTest() {
+    const browser = await launchPuppeteer(true);
+    const page = await browser.newPage();
+
+    await page.goto("https://example.com");
+
+    const signals = await collectSignals(page);
+    const detection = analyzeSignals(signals);
+
+    await browser.close();
+
+    return {
+        name: "Puppeteer Chromium Headless",
+        actualAutomated: true,
+        predictedAutomated: detection.automated,
+        indicators: detection.indicators,
+        signals
     };
 }
 
 async function main() {
     const results = [];
 
+    // Human/browser baselines
     results.push(
-        await runCase(
-            "Chromium Headful",
+        await runBrowserTest(
+            "Chromium Headful 1280x720",
             false,
-            { headless: false }
+            async () => launchChromiumWithSize(false, 1280, 720)
         )
     );
 
     results.push(
-        await runCase(
-            "Chromium Headless",
-            true,
-            { headless: true }
+        await runBrowserTest(
+            "Firefox Headful",
+            false,
+            async () => launchFirefox(false)
         )
     );
 
-    console.table(results);
+    // Automated/browser cases
+    results.push(
+        await runBrowserTest(
+            "Chromium Headless 1280x720",
+            true,
+            async () => launchChromiumWithSize(true, 1280, 720)
+        )
+    );
+
+    results.push(
+        await runBrowserTest(
+            "Firefox Headless",
+            true,
+            async () => launchFirefox(true)
+        )
+    );
+
+    results.push(await runPuppeteerTest());
+
+    console.log(JSON.stringify(results, null, 2));
+
+    // console.table(results);
 
     const metrics = calculateMetrics(results);
 
     console.log("\nEvaluation Metrics:");
     console.table(metrics);
 
-    console.log(
-        JSON.stringify(results, null, 2)
-    );
+    return results;
 }
 
-main().catch(error => {
-    console.error(error);
-    process.exit(1);
-});
+if (require.main === module) {
+    main().catch(error => {
+        console.error(error);
+        process.exit(1);
+    });
+}
+
+module.exports = { main };
